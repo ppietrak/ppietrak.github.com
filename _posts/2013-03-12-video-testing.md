@@ -4,7 +4,7 @@ title: 'Video testing with software decoding'
 author: 'Piotr Ziomacki'
 categories: Video
 tags: B2G pandaboard video 
-published: false
+published: true
 ---
 
 In this post I present results of video playback tests on B2G on Pandaboard. What we wanted to test was capability of playing mp4 files (with and without HTML <video> tag) within web browser, but also streamed content from services like [Dailymotion] (http://www.dailymotion.com) and [Youtube](http://www.youtube.com/).
