@@ -7,7 +7,7 @@ published: true
 
 Making Pandaboard Build Usable.
 
-We managed to run Firefox OS on Pandaboard, but there are a lot of problems now - the screen is rotated, mouse cursor is invisible and physical keyboard does not work. We'll now make patches and fixes (some dirty ones) to make it look and behave better.
+We've managed to run Firefox OS on Pandaboard, but there is a lot of problems now: the screen is rotated, mouse cursor is invisible and physical keyboard does not work. We'll now make patches and fixes (some dirty ones) to make it look and behave better.
 
 <!--more-->
 
