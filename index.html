@@ -15,18 +15,6 @@ published: true
       <p>{{ post.content | split:'<!--more-->' | first }}</p>
       <p><a href="{{ post.url }}">(more…)</a></p>
     </section>
-    <footer>
-      <span>Categories:
-        {% for cat in post.categories %}
-        <a href="/categories.html#{{ cat }}" rel="tag">{{ cat }}</a>
-        {% endfor %}
-      </span>
-      <span>Tags:
-        {% for tag in post.tags %}
-        <a href="/tags.html#{{ tag }}" rel="tag">{{ tag }}</a>
-        {% endfor %}
-      </span>
-    </footer>
 </article>
 {% endfor %}
 
