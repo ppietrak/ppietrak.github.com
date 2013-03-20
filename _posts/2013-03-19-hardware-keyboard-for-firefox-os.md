@@ -23,6 +23,9 @@ The second issue is obviously the source of problem. In order to fix that and su
 *    The metastate information. The keyboard metastate describes the current state of key interpretation (for example, if ALT or SHIFT is pressed). We debugged it a little and found out that the metastate is correctly updated by lower layers, but ignored by nsAppShell keyEvent sending.
 *    The keyboard character mapping. The keyboard mapping is correctly loaded from file ("Generic.kcm" in case of generic keyboard) during device registration. Unfortunately, it is not passed nor exposed to nsAppShell. We have added a dirty hack exposing the keyboard mapping via static variable. This is of course not the proper fix; apart from the ugliness of static variable itself, the variable will be overwritten if there are more than one keyboard mappings. At the moment, we'll simply put the ugly fix for now and notify B2G team so they can propose something nicer.
 
+Finally, we can use the physical keyboard for Pandaboard.
+
+<iframe width="560" height="315" src="http://www.youtube.com/embed/yM69vJHXTOI" frameborder="0" allowfullscreen></iframe>
 
 Exposing the character map:
 ---------------------------
@@ -154,6 +157,5 @@ widget/gonk/nsAppShell.cpp
 		 }
 	 }
 
-Finally, we can use the physical keyboard for Pandaboard.
 
 
