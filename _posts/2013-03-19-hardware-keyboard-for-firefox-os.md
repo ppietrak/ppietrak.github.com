@@ -58,7 +58,7 @@ widget/gonk/libui/Keyboard.cpp
 	 }
 	 
 	 
-	+KeyCharacterMap *getCharacterMap() //PPI
+	+KeyCharacterMap *getCharacterMap()
 	+{
 	+    return exposedMap;
 	+}
