@@ -1,0 +1,271 @@
+---
+layout: post
+title: 'Javascript-based Mp4 Analyser'
+author: 'Przemyslaw Pietrak'
+published: true
+---
+
+Here is our simple tool for analysis of MP4 files. Enjoy!
+
+<!--more-->
+
+<script type="text/javascript" src="/javascripts/mp4lib/0.1/mp4lib.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" ></script>
+
+<style type="text/css">
+	div.MP4box { font-style:monospace; }
+	#file { background-color:black;padding:5px;}
+	div.headline>span,div.headline>a{margin-right:6px;display:inline-block;}
+	.id{color:yellow;font-weight:bold;}
+	.size, .info {font-size:10px;color:gray;}
+	.smallbutton:hover {cursor:pointer;}
+	a.thrash { background-image:url('/images/thrash.png');}
+	a.thrash:hover { background-image:url('/images/thrash-h.png');}
+	a.expand { background-image:url('/images/expand.png');}
+	a.expand:hover { background-image:url('/images/expand-h.png');}
+	a.showdata { background-image:url('/images/zoom.png');}
+	a.showdata:hover { background-image:url('/images/zoom-h.png');}
+	.smallbutton{width:12px;height:12px;background-repeat:no-repeat;background-position:center bottom; }
+	.binarydata{font-family:monospace;font-size:15px;}
+	div.content {margin-left:4em;}
+</style>
+
+
+
+<p>This tool is a test and demonstration of our mp4box.js library. Even though the library is during development and it's functionality is greatly limited, the tool may be already quite useful.</p>
+
+<h2>Before You Start</h2>
+<ul>
+<li>The tool uses MediaSource interface, which today is implemented only in Google Chrome. In other words, you need to use Google Chrome to run it.</li>
+<li>Some of the sample files (smoothstreaming fragments) are hosted on our test lab CDN. You need to run chrome with --disable-network-security to access these. (You need to kill all instances of Google Chrome first).</li>
+<li>This tool is experimental and we do not guarantee the correctness of the analysis results. You are using it at your own risk.</li>
+</ul>
+
+
+<h2>The tool itself</h2>
+
+<table>
+	<tr>
+		<td style="text-align:right;">Enter the MP4 file URL:</td>
+		<td><input id="input_url" style="width:100%"></td>
+		<td><input type="button" onclick="loadFile(document.getElementById('input_url').value);" value="Load" /></td>
+	</tr>
+	<tr>
+		<td style="text-align:right;">Or, select sample:</td>
+		<td>
+			<select id="input_sample" style="width:100%">
+				<option value="/images/video-dash-01.mp4">Weather broadcast (DASH, single fragment)</option>
+				<option value="http://cdn-ott.rd.tp.pl/TVE/Smooth/pr_ottRE9jozxq/pr_ott.ism/QualityLevels(2030000)/Fragments(video=0)">Weather broadcast fragment (Smoothstreaming, single fragment)</option>
+				<option value="/images/car.mp4">Car drive (DASH, multiple fragments)</option>
+			</select>
+		</td>
+		<td><input type="button" onclick="var url=document.getElementById('input_sample').value;document.getElementById('input_url').value=url;loadFile(url);" value="Load"/></td>
+	</tr>
+</table>
+<div id="loader" style="padding:20px;display:none;">
+Loading <img src="/images/ajax-loader.gif">
+</div>
+<div id="file-structure" style="display:none;">
+<h2>File Structure</h2>
+<p>You can now browse file structure by pressing on &quot;+&quot; marks. It is also possible to alter the file, currently only by deleting the nodes.<p>
+<div id="file"></div>
+
+<div id="hex" style="font-family:monospace"></div>
+
+<div id="play-file" style="display:none;">
+	<h2>Play the file</h2>
+	Once the file is loaded, you can try to play it inside the &lt;video&gt; tag, by pushing its contents via the MediaSource interface. The file will be re-generated from the current box structure, so if you delete some boxes from the tree above, they will be also excluded from the binary data sent to mediaBuffer. Please note, only DASH-ed files will be played by Google Chrome.
+	<table>
+	<tr>
+	<td style="text-align:right;">Source buffer initialization:</td>
+	<td><input id="input_codecstring" style="width:100%" value="video/mp4; codecs=&quot;avc1.42801e&quot;"/></td>
+	<td><input type="button" onclick="playFile(document.getElementById('input_codecstring').value);" value="Play"/></td>
+	</tr>
+	</table>
+
+	<video controls autoplay width="320" height="240"></video>
+</div>
+</div>
+
+<h2>Possible experiments</h2>
+<p>
+There are some simple experiments you can do:
+<ul>
+<li>You can parse any file from the internet.</li>
+<li>Since the tool is running inside the browser on your local machine, you may use it to analyse any file from your local network. The file doesn't need to be accessible from the outside.</li>
+<li>You can see the structure of DASH file and compare it with the SmoothStreaming fragment sample. As you will see, smoothstreaming fragments lack the moov box, which is the main reason why it is not possible to play them directly.</li>
+<li>You may remove some boxes from mp4 file and check if it is still playable using MediaBuffer interface.</li>
+</ul>
+</p>
+
+
+
+<script>
+
+window.MediaSource = window.MediaSource || window.WebKitMediaSource;
+if (!!!window.MediaSource) 
+{
+  alert('MediaSource API is not available');
+}
+
+var boxesflatlist = []
+var boxesflatlistcount = 0;
+
+var boxes = null;
+var boxesHandler = new Mp4BoxArrayHandler();
+
+function GET(url, callback) {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', url, true);
+  xhr.responseType = 'arraybuffer';
+  xhr.send();
+
+  xhr.onload = function(e) {
+    if (xhr.status != 200) {
+      alert("Unexpected status code " + xhr.status + " for " + url);
+      return false;
+    }
+    callback(new Uint8Array(xhr.response));
+  };
+}
+
+
+function playFile( codecString )
+{    
+    if (!boxes) 
+    {
+      alert("File is not loaded");
+      return false;
+    }
+
+	var video = document.querySelector('video');
+    var mediaSource = new MediaSource();
+    video.src = window.URL.createObjectURL(mediaSource);
+
+	mediaSource.addEventListener('webkitsourceended', function(e) {
+	  console.log('mediaSource readyState: ' + this.readyState);
+	}, false);
+
+
+	mediaSource.addEventListener('webkitsourceopen', function(e) 
+    {	
+        var sourceBuffer = mediaSource.addSourceBuffer(codecString);
+        console.log('sourceopen '+codecString);
+		u = boxesHandler.serialize( boxes );
+		sourceBuffer.append(u);
+		mediaSource.endOfStream();
+	});
+}
+
+
+function loadFile(url)
+{
+    $('#file-structure').hide();
+    $('#loader').show();
+	GET(url, function(uInt8Array) {
+		u = uInt8Array;		
+		boxes = boxesHandler.parse(uInt8Array, 0, uInt8Array.length, 0, null);
+
+        $('#loader').hide();;
+        $('#file').html(renderFilePanelHTML(boxes));
+        $('div.container>div.headline').prepend('<a class="smallbutton expand"></a>');
+        $('div.data>div.headline').prepend('<a class="smallbutton showdata"></a>');
+        $('div.headline').append('<a class="smallbutton thrash"></a>');
+        $('.content').hide();
+		$('.expand').click( function() { $(this).parent().next().slideToggle();});
+		$('.showdata').click( function() { $(this).parent().next().slideToggle();});
+        $('.thrash').click( function() { _removeBox( $(this).parent().parent().attr('id') ); $(this).parent().parent().remove();});
+  		$('#file-structure').show();
+		if (boxes.length>0)
+		{
+			$('#play-file').show();
+
+		}
+		else
+		{
+			$('#play-file').hide();
+		}
+	  });
+}
+
+function _removeBox( id )
+{
+    var box = boxesFlatList[id];
+    var parent = box.parent;
+    boxesHandler.removeBox(boxes,box);
+
+    while (parent!=null)    	
+    {
+		$('#'+parent.editorid+'>div.headline>span.size').html(parent.size);	
+        parent = parent.parent;
+    }
+}
+
+function renderFilePanelHTML(boxes)
+{
+    boxesFlatList = []
+    boxesFlatListCount = 0;
+
+    return _renderFilePanelHTML_recursive(boxes)
+}
+
+function _renderFilePanelHTML_recursive(boxes)
+{
+    var r="";
+    for (var i=0;i<boxes.length;i++)
+    {
+        var box=boxes[i];
+        boxesFlatList.push(box);
+        box.editorid = boxesFlatListCount;
+        boxesFlatListCount+=1;
+
+        var boxclass="MP4Box";
+        if (box.children)
+             boxclass=boxclass+' container';
+        
+        if (box.data)
+             boxclass=boxclass+' data';
+            
+        r=r+'<div id="'+box.editorid+'" class="'+boxclass+'">';
+        r=r+'<div class="headline">'
+        r=r+'<span class="id">'+box.id+'</span>';
+        r=r+'<span class="name">'+box.name+'</span>';
+        r=r+'<span class="size">'+box.size+'</span>';
+        r=r+'</div>';
+        r=r+'<div class="content">';
+        if (box.children)
+            r=r+_renderFilePanelHTML_recursive(box.children);
+        if (box.data)
+            r=r+renderDataHTML(box.data);
+        r=r+'</div>'
+        r=r+'</div>'
+        
+    }
+    return r;
+}
+
+function renderDataHTML( data )
+{
+    var LIMIT = 320;
+    var r='<div class="binarydata">';
+
+	for (var i = 0; (i < data.length) && (i<LIMIT); i++) {
+        l = data[i].toString(16);
+        if (l.length<2) l='0'+l;
+        r=r+''+l+' '        
+    }
+
+    if (LIMIT<data.length)
+        r=r+'<span class="info">('+(data.length-LIMIT)+' more bytes)</span>'
+
+    if (data.length==0)
+        r=r+'<span class="info">(no data to show, box is empty)</span>'
+
+    r = r+'</div>';
+    return r;
+}
+
+</script>
+
+
+
