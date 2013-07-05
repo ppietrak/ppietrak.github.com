@@ -161,12 +161,12 @@ function playFile( codecString )
 function loadFile(url)
 {
     $('#file-structure').hide();
-    $('#loader').show();
+    $('#loader').slideDown();
 	GET(url, function(uInt8Array) {
 		u = uInt8Array;		
 		boxes = boxesHandler.parse(uInt8Array, 0, uInt8Array.length, 0, null);
 
-        $('#loader').hide();;
+        $('#loader').slideUp();;
         $('#file').html(renderFilePanelHTML(boxes));
         $('div.container>div.headline').prepend('<a class="smallbutton expand"></a>');
         $('div.data>div.headline').prepend('<a class="smallbutton showdata"></a>');
@@ -175,15 +175,15 @@ function loadFile(url)
 		$('.expand').click( function() { $(this).parent().next().slideToggle();});
 		$('.showdata').click( function() { $(this).parent().next().slideToggle();});
         $('.thrash').click( function() { _removeBox( $(this).parent().parent().attr('id') ); $(this).parent().parent().remove();});
-  		$('#file-structure').show();
+  		$('#file-structure').slideDown();
 		if (boxes.length>0)
 		{
-			$('#play-file').show();
+			$('#play-file').slideDown();
 
 		}
 		else
 		{
-			$('#play-file').hide();
+			$('#play-file').slideUp();
 		}
 	  });
 }
