@@ -46,6 +46,7 @@ SmMediaObject.prototype.open = function( url )
 		if (smMedia.onload) {
            smMedia.onload();
         };
+        smMedia.loadFragment();
 	};
 
     // by default, first audio/video streams are selected, with the first quality levels
@@ -100,10 +101,45 @@ SmMediaObject.prototype.getNextFragment = function()
 {
    // need to create moov and moof
 
-
-
-
 }
+
+SmMediaObject.prototype.loadFragment = function()
+{
+    var xhr = new XMLHttpRequest();
+	  xhr.open('GET', '/images/zplatformy-clean.mp4', true);
+	  xhr.responseType = 'arraybuffer';
+	  xhr.send();
+      var smMedia = this;
+
+	  xhr.onload = function(e) {
+		if (xhr.status != 200) {
+		  alert("Unexpected status code " + xhr.status + " for " + url);
+		  return false;
+		}
+        var f = new File();
+		u = new Uint8Array(xhr.response);		
+        f = new File();
+        p = new DeserializationBoxFieldsProcessor(f,u,0,u.length);
+	    f._processFields(p);
+        smMedia.fragment = f;
+        smMedia.play()	
+	  };
+}
+
+SmMediaObject.prototype.play = function()
+{
+	// TUTAJ DO DOPISANIA 
+ 
+	console.log('\n\n\nJestem funkcja do dopisania');
+	console.log('mam manifest:');
+	console.log(this.manifest);
+	console.log('oraz sparsowany plik z platformy:');
+	console.log(this.fragment);
+	var moov = new MovieBox();
+	console.log('ale moov na razie wyglada slabo, trzeba go uzupełnić:');
+    console.log(moov);
+}
+
 
 
 
