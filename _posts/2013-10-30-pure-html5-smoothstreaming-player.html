@@ -1,0 +1,217 @@
+---
+layout: post
+title: 'Pure HTML5 Smoothstreaming Player'
+author: 'Przemyslaw Pietrak'
+published: true
+---
+
+We have done it! Ladies and gentlemen, Orange Labs Poland proudly presents pure HTML5 smoothstreaming player. No Silverlight plugin is needed.<br/>
+There is however one important limitation: no DRM available.
+
+
+<!--more-->
+
+<script type="text/javascript" src="/javascripts/mp4lib.js"></script>
+<script type="text/javascript" src="/javascripts/mp4lib-fieldProcessors.js"></script>
+<script type="text/javascript" src="/javascripts/mp4lib-fields.js"></script>
+<script type="text/javascript" src="/javascripts/mp4lib-helpers.js"></script>
+<script type="text/javascript" src="/javascripts/mp4lib-boxes.js"></script>
+<script type="text/javascript" src="/javascripts/SmPlayer.js"></script>
+<script type="text/javascript" src="/javascripts/SmMedia.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" ></script>
+
+<h2>Why is this an important achievement?</h2>
+Well, considering you already have Silverlight plugin, you may not see a big benefit behind pure javascript player. But please consider all the environements where silverlight is not available: all kinds of mobile devices (Android, WebOSes), or various non-windows operating systems. This is the great gap for all smoothstreaming-based services which our player may fit.<br>
+There are also many other benefits of javascript approach, starting with better programmable control over the playback (eg dynamic track selection), ending with the possible attempts to put video element into WebGL.
+
+<h2>Prerequisities</h2>
+<ul>
+<li>Your browser must support Media Streaming Extensions. Latest versions of Google Chrome and Internet Explorer are known to support it.</li>
+<li>Since our javascript retrieves data from other server, the server must allow cross-domain ajax requests using the Access-Control-Allow-Origin header. If your server doesn't allow it and you are unable to reconfigure it, please disable the security checks (it is done client-side) by launching chrome as follows: <b>google-chrome --disable-web-security (please close all chrome windows first)</b></li>
+</ul>
+
+<h2>Play video</h2>
+
+<h3>Step 1: Load manifest</h3>
+
+<table>
+	<tr>
+		<td style="text-align:right;">Enter the URL of your smoothstreaming manifest:</td>
+		<td><input id="input_url" style="width:100%"></td>
+		<td><input type="button" onclick="runDemo(document.getElementById('input_url').value);" value="> Load it!" /></td>
+	</tr>
+	<tr>
+		<td style="text-align:right;">Or, select one of ours:</td>
+		<td>
+			<select id="input_sample" style="width:100%">
+				<option value="http://origin-vod-ss.ott.rd.tp.pl/SS/bunny2/bunny2/BigBuckBunny.ism">Test video 1: Big Buck Bunny</option>
+				<option value="http://origin-vod-ss.ott.rd.tp.pl/SS/Faust/Faust/euronews-vod.ism">Test video 2: Weather broadcast</option>
+				<option value="http://origin-vod-ss.ott.rd.tp.pl/SS/Zaglada/Zaglada/tvtit-vod-2.ism">Test video 3</option>
+				<option value="http://origin-vod-ss.ott.rd.tp.pl/SS/Robale/Robale/tvtit-vod-1.ism">Test video 4</option>
+			</select>
+		</td>
+		<td><input type="button" onclick="runDemo(document.getElementById('input_sample').value);" value="> Load it!"/></td>
+	</tr>
+</table>
+<div style="font-size:10px;padding-top:10px;">Our test videos are hosted on the test smoothstriming platform of Orange Labs Poland, which is, as its name suggests, for tests only; it may stop working any time. The Big Buck Bunny video courtesy of Blender Foundation | www.blender.org. </div>
+
+<h3>Step 2: Select quality</h3>
+
+<div id="quality" style="margin-bottom:10px;"></div>
+<div id="vparent" style="position:relative">
+<video id="v" controls autoplay width="640" height="480"></video>
+<div id="curtainleft" style="position:absolute;left:0;top:0;bottom:0;right:100%;background-color:rgb(35,35,35);"></div>
+<div id="curtainright" style="position:absolute;left:100%;top:0;bottom:0;right:0;background-color:rgb(35,35,35);"></div>
+</div>
+
+<div style="experiments">
+<h3>Step 3: Enjoy HTML5 (if you are still thinking Silverlight is better)</h3>
+<input type="button" onclick="runEffect(0);" value="> Effect 1"/>
+<input type="button" onclick="runEffect(1);" value="> Effect 2"/>
+<input type="button" onclick="runEffect(2);" value="> Effect 3"/>
+<input type="button" onclick="runEffect(3);" value="> Effect 4 (Yes, that is a mirror!)"/>
+<input type="button" onclick="runEffect(4);" value="> Effect 5"/>
+</div>
+
+
+
+<div id="fragments"></div>
+
+<h2>How it works (roughly)</h2>
+<ul>
+<li>Manifest xml file is downloaded from the server, all the video fragments information is parsed</li>
+<li>Moov box is created basing on the manifest contents and some smoothstreaming pre-defined values (eg. the default timescale is 135000000). The information about the video track is inserted into moov (this includes also creation of AVC1 Visual Sample Entry basing on the codec information from manifest, describing SPS/PPS NALs). Also, ftyp box is constructed.</li>
+<li>Fragments are downloaded one by one and modified as follows:</li>
+<ul>
+<li>BaseMediaDecodeTime box is created, the correct presentation time is counted and inserted into mfra. (it is missing from smoothstreaming fragments)</li>
+<li>sequence number is adjusted</li>
+<li>For the first fragment only, SPS and PPS information is inserted at the beginning of the data in mdat.</li>
+</ul>
+<li>All the data (ftyp, moov, fragments) are then serialized to mp4 binary buffer (using the mp4lib javascript library we created) and pushed to video element using MediaSource API. Moov and ftyp is added to the first fragment only.</li>
+<li>At the top of it, there is a simple streaming player which controls the playback progress and downloads next fragments if the current playback position is closer than 5 seconds from the end of last downloaded fragment. You can pause the playback or skip to the middle of buffered file and observe that download stops until you are close to the end again.</li>
+</ul>
+
+
+<h2>What is not supported yet</h2>
+The current player is merely a proof of concept. It has a lot of limitations:
+<ul>
+<li>Adaptativeness and waiting for enough data before start. You may experience some junk on video when you play it for the first time; or if your connection is too slow. Reload the page and enjoy better experience thanks to your browser cache. Or, just select lower bitrate.</li>
+<li>Changing video quality during playback. If you change it, you will see junk on video. You can only select the video quality before the playback starts. </li>
+<li>Audio. There is no audio, only the video track is processed.</li>
+<li>Changing the video. Once the playback is started, there is no possibility to reinit it for the different file. (you need to reload the page)</li>
+<li>Jumps to position. You can only jump in the downloaded content, using the navigation bar of the video element. But you cannot jump into the timeline position which is not downloaded yet.</li>
+</ul>
+
+All of the problems are not roadblockers (well, audio/video synchronisation and quality changing may still be little tricky). The real difficulty was processing the binary fragments, including codec information manipulation. And we have already done it. Now, the main roadblock is removed and the way for javascript smoothstreaming player is open.
+
+
+<h2>Good News</h2>
+We are considering open sourcing our player on some permissive license. It is not done yet (as well as the player is not ready).
+If you are interested, please email me at przemyslaw.pietrak@orange.com
+
+<script>
+
+window.MediaSource = window.MediaSource || window.WebKitMediaSource;
+if (!!!window.MediaSource) 
+{
+  alert('MediaSource API is not available');
+}
+
+function runDemo(url) {
+    
+    smPlayer = new SmPlayer(document.querySelector('video'));
+    smPlayer.fragmentLoadedCallback=fragmentLoaded;
+    smPlayer.open(url, smMediaAvailable );
+}
+
+function drawPlaybackProgress() {
+    var f = smPlayer.smMedia.getFragmentForTime(document.querySelector('video').currentTime);
+    if (f!=focusedFragment)  {
+       if (focusedFragment) focusedFragment.css('background-color','green');
+       focusedFragment = $('#f'+f);
+       if (focusedFragment) focusedFragment.css('background-color','red');
+    }
+}
+
+function fragmentLoaded( fragmentNumber ) {
+    $('#f'+fragmentNumber).css('background-color','green');
+    $('#f'+fragmentNumber).html(''+smPlayer.smMedia.currentVideoQualityIndex);
+}
+
+function smMediaAvailable() {
+  
+    var i;
+    
+    // create quality selection component
+    qualities = smPlayer.smMedia.getVideoQualities(0);  
+    var t = 'Video quality: <select id="quality_select" onchange="qualitySelected();">';
+    
+    for (i=0;i<qualities.length;i++)       
+    {
+        s = '';
+        if (i==qualities.length-1) s='selected'; // select last bitrate, as it is typically the lowest (this should be done by player)
+        t = t+'<option value="'+i+'" '+s+'>'+i+': '+qualities[i]+'</option>';
+    }
+    t = t+'</select>'
+    t=t+'<input type="button" onclick="playIt();" value="> Play it!"/>';
+
+    $('#quality').html(t);
+
+    // create fragments visualisation
+    for (i=0;i<smPlayer.smMedia.numberOfVideoFragments;i++)
+    {
+        $("#fragments").append("<div style='display:inline-block;width:30px;height:20px;text-align:center;border:1px solid #000;background-color:#888;' id='f"+i+"'>&nbsp;</div>");
+    }
+    qualitySelected();
+}
+
+function playIt()
+{    
+    qualitySelected();
+    smPlayer.start();
+    // set up a timer to track playback progress on fragments list
+    focusedFragment = null;
+    progressTimer = setInterval(function(){drawPlaybackProgress();},500);
+}
+
+function qualitySelected() {
+    smPlayer.smMedia.selectStream(0,$( "#quality_select" ).val(),0,0);
+}
+
+function runEffect( number ) {
+    if (number==0) $('#v').animate({width: "20%"}, 1500).animate({width:"100%"},1500);
+
+    if (number==1) { 
+		$('#curtainright').animate({left: "30%"}, 1000).animate({left:"100%"},1000).animate({left: "30%"}, 1000).animate({left:"100%"},1000);
+		$('#curtainleft').delay(1000).animate({right: "30%"}, 1000).animate({right:"100%"},1000).animate({right: "30%"}, 1000).animate({right:"100%"},1000);
+    }
+  
+    if (number==2) $('#v').animate({deg: 400}, {
+        duration: 3000,
+        step: function(now) {
+            $('#vparent').css({
+                transform: 'rotate(' + now + 'deg)'
+            });
+        }
+    });
+
+    if (number==3) $('#v').animate({pos: 100}, {
+        duration: 2000,
+        step: function(pos) {
+            $('#v').css('-webkit-transform', 'matrix('+(1-pos*0.02)+',0,0,1,0,0)');            
+        }
+    });
+
+    if (number==4) $('#v').animate({pos: 70}, {
+        duration: 2000,
+        step: function(pos) {
+            $('#v').css('-webkit-transform', 'matrix(1,'+pos*0.01+','+pos*0.01+',1,0,0)');            
+        }
+    });
+}
+
+
+</script>
+
+
+
