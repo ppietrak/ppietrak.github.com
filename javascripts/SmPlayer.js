@@ -38,7 +38,7 @@ function SmPlayer( videoElement ) {
 SmPlayer.prototype.open = function( url, callback )
 {
     var xhr = new XMLHttpRequest();
-	xhr.open('GET', url+'/manifest', true);
+	xhr.open('GET', url, true);
 	xhr.send();
     var smPlayer = this;
 
@@ -48,7 +48,7 @@ SmPlayer.prototype.open = function( url, callback )
             return;
 		}
 
-        smPlayer.smMedia = new SmMediaObject(xhr.responseXML, url); 
+        smPlayer.smMedia = new SmMediaObject(xhr.responseXML, url.replace('/manifest','').replace('/Manifest','')); 
 
         if (callback)
             callback( smPlayer.smMedia );
