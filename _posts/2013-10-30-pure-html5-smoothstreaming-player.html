@@ -21,13 +21,21 @@ There is however one important limitation: no DRM available.
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" ></script>
 
 <h2>Why is this an important achievement?</h2>
-Well, considering you already have Silverlight plugin, you may not see a big benefit behind pure javascript player. But please consider all the environements where silverlight is not available: all kinds of mobile devices (Android, WebOSes), or various non-windows operating systems. This is the great gap for all smoothstreaming-based services which our player may fit.<br>
-There are also many other benefits of javascript approach, starting with better programmable control over the playback (eg dynamic track selection), ending with the possible attempts to put video element into WebGL.
+There are several reasons:
+<ul>
+<li>All it needs is a modern browser. Please consider all the environements where silverlight is not available: all kinds of mobile devices (Android, WebOSes), or various non-windows operating systems. This is the great gap for all smoothstreaming-based video services which our player fills.</li>
+<li>The player is fully programmable and you can have complete and straightforward control over it from javascript level.</li>
+<li>The player is compatible with other HTML5 features, from element positioning tro the WebGL. You will find some nice examples below.</li>
+<li>Users don't need to install Silverlight or anything, it works on all modern browsers out-of-the-box.</li>
+</ul>
+
+<h2>Ok, but you could use DASH! Why smoothstreaming?</h2>
+Because there are already a lot of deployed smoothstreaming headends, just waiting to be used. And not so many DASH ones.
 
 <h2>Prerequisities</h2>
 <ul>
 <li>Your browser must support Media Streaming Extensions. Latest versions of Google Chrome and Internet Explorer are known to support it.</li>
-<li>Since our javascript retrieves data from other server, the server must allow cross-domain ajax requests using the Access-Control-Allow-Origin header. If your server doesn't allow it and you are unable to reconfigure it, please disable the security checks (it is done client-side) by launching chrome as follows: <b>google-chrome --disable-web-security (please close all chrome windows first)</b></li>
+<li>Since our javascript retrieves data from other server, the server must allow cross-domain ajax requests using the Access-Control-Allow-Origin header. If your server doesn't allow it and you are unable to reconfigure it, please disable the security checks (it is done client-side) by launching chrome as follows: <b>google-chrome --disable-web-security</b> (tested on Ubuntu) or <b>chrome.exe --disable-web-security</b> (tested on Windows XP). Please close all chrome windows first.</li>
 </ul>
 
 <h2>Play video</h2>
