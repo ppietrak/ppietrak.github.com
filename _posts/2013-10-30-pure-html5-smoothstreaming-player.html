@@ -5,7 +5,7 @@ author: 'Przemyslaw Pietrak'
 published: true
 ---
 
-We have done it! Ladies and gentlemen, Orange Labs Poland proudly presents pure HTML5 smoothstreaming player. No Silverlight plugin is needed.<br/>
+We have done it! Ladies and gentlemen, Orange Labs Poland proudly presents pure HTML5 smoothstreaming player. No Silverlight plugin is needed, it works even on Android browser starting with Android 4.2.<br/>
 There is however one important limitation: no DRM available.
 
 
@@ -20,39 +20,14 @@ There is however one important limitation: no DRM available.
 <script type="text/javascript" src="/javascripts/SmMedia.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" ></script>
 
-<h2>Why is this an important achievement?</h2>
-There are several reasons:
-<ul>
-<li>All it needs is a modern browser. While Silverlight is a nice technology, there are unfortunately many environements where it is not available: many kinds of mobile devices (Android, WebOSes) and various non-windows operating systems. This is the great gap for all smoothstreaming-based video services which our player intends to fill.</li>
-<li>The player is fully programmable and you can have complete and straightforward control over it from javascript level.</li>
-<li>The player is compatible with other HTML5 features, from element positioning tro the WebGL. You will find some nice examples below.</li>
-<li>Users don't need to install any plugins (Silverlight), it works on all modern browsers out-of-the-box.</li>
-</ul>
 
-<h2>Ok, but you could use DASH! Why smoothstreaming?</h2>
-Smoothstreaming is a Microsoft technology, while DASH is an open standard. Both W3C and many industry players (Google) are pushing towards DASH, which is, in long term, a good choice (even Microsoft is strongly involved in DASH development). So why are we interested in Smoothstreaming?<br>
-The answer is pretty simple. Today, Smoothstreaming is widely used and that will not change very soon. There are already a lot of deployed smoothstreaming headends just waiting to be used.
-
-<h2>Prerequisities</h2>
-<ul>
-<li>Your browser must support Media Streaming Extensions. Latest versions of Google Chrome and Internet Explorer are known to support it.</li>
-<li>If you want to use the player hosted on ppietrak.github.io to play content from your own server, or use our "Orange Labs Test Server", you need to disable origin access security policy in your browser. Basically speaking, your browser will not allow javascript hosted on ppietrak.github.io to access data from other server (unless the server allows it explicitly using the Access-Control-Allow-Origin; but it is typically not allowed). This security check is done client-side (in the browser) and you can disable it in Google Chrome by launching as follows: <b>google-chrome --disable-web-security</b> (tested on Ubuntu) or <b>chrome.exe --disable-web-security</b> (tested on Windows XP). Please close all chrome windows first. <br/>
-PLEASE NOTE all this 'security disabling' would not be needed if you hosted the player on the same domain as your video, which is the intended way of deploying the player.</li>
-
-</ul>
-
-<h2>Play video</h2>
+<h2>Let's start with the demo</h2>
 
 <h3>Step 1: Load manifest</h3>
 
 <table>
 	<tr>
-		<td style="text-align:right;">Enter the URL of your smoothstreaming manifest:</td>
-		<td><input id="input_url" style="width:100%"></td>
-		<td><input type="button" onclick="runDemo(document.getElementById('input_url').value);" value="> Load it!" /></td>
-	</tr>
-	<tr>
-		<td style="text-align:right;">Or, select one of ours:</td>
+		<td style="text-align:right;">Select one of test videos:</td>
 		<td>
 			<select id="input_sample" style="width:100%">
 				<option value="/BigBuckBunny.ism/manifest.xml">Same domain hosted: Big Buck Bunny</option>
@@ -65,9 +40,14 @@ PLEASE NOTE all this 'security disabling' would not be needed if you hosted the 
 		</td>
 		<td><input type="button" onclick="runDemo(document.getElementById('input_sample').value);" value="> Load it!"/></td>
 	</tr>
+	<tr>
+		<td style="text-align:right;">Or enter the URL of your smoothstreaming manifest:</td>
+		<td><input id="input_url" style="width:100%"></td>
+		<td><input type="button" onclick="runDemo(document.getElementById('input_url').value);" value="> Load it!" /></td>
+	</tr>
 </table>
 <div style="padding-top:10px;color:red;">
-<b>IMPORTANT! Only the first option (same domain video) will work without hosting the player on the same domain as the video or disabling the origin access security policy in browser (please read prerequisities above for details).</b>
+<b>IMPORTANT! Only the first file (same domain hosted) will work without hosting the player on the same domain as the video or disabling the origin access security policy in browser (please read prerequisities below for details).</b>
 </div>
 <div style="font-size:10px;padding-top:10px;">The Big Buck Bunny video courtesy of Blender Foundation | www.blender.org. </div>
 
@@ -75,7 +55,7 @@ PLEASE NOTE all this 'security disabling' would not be needed if you hosted the 
 
 <div id="quality" style="margin-bottom:10px;"></div>
 <div id="vparent" style="position:relative">
-<video id="v" controls autoplay width="640" height="480"></video>
+<video id="v" controls autoplay style="width:100%;height:auto;"></video>
 <div id="curtainleft" style="position:absolute;left:0;top:0;bottom:0;right:100%;background-color:#252525;"></div>
 <div id="curtainright" style="position:absolute;left:100%;top:0;bottom:0;right:0;background-color:#252525;"></div>
 </div>
@@ -92,6 +72,29 @@ PLEASE NOTE all this 'security disabling' would not be needed if you hosted the 
 
 
 <div id="fragments"></div>
+
+<h2>Why is this an important achievement?</h2>
+There are several reasons:
+<ul>
+<li>All it needs is a modern browser. While Silverlight is a nice technology, there are unfortunately many environements where it is not available: many kinds of mobile devices (Android, WebOSes) and various non-windows operating systems. This is the great gap for all smoothstreaming-based video services which our player intends to fill.</li>
+<li>The player is fully programmable and you can have complete and straightforward control over it from javascript level.</li>
+<li>The player is compatible with other HTML5 features, from element positioning tro the WebGL. You will find some nice examples below.</li>
+<li>Users don't need to install any plugins (Silverlight), it works on all modern browsers out-of-the-box.</li>
+</ul>
+
+<h2>Ok, but you could use DASH! Why smoothstreaming?</h2>
+Smoothstreaming is a Microsoft technology, while DASH is an open standard. Both W3C and many industry players (Google) are pushing towards DASH, which is, in long term, a good choice (even Microsoft is strongly involved in DASH development). So why are we interested in Smoothstreaming?<br>
+The answer is pretty simple. Today, Smoothstreaming is widely used and that will not change very soon. There are already a lot of deployed smoothstreaming headends just waiting to be used.
+
+<h2>Prerequisities</h2>
+<ul>
+<li>Your browser must support Media Streaming Extensions. Latest versions of Google Chrome and Internet Explorer are known to support it. The Chrome browser in  Android 4.2 supports it.
+<img src="/images/html5-smoothstreaming-player-on-android.jpg" alt="HTML5 smoothstreaming player on Android 4.2" style="max-width:400px;height:auto;margin:auto;"</img></li>
+<li>If you want to use the player hosted on ppietrak.github.io to play content from your own server, or use our "Orange Labs Test Server", you need to disable origin access security policy in your browser. Basically speaking, your browser will not allow javascript hosted on ppietrak.github.io to access data from other server (unless the server allows it explicitly using the Access-Control-Allow-Origin; but it is typically not allowed). This security check is done client-side (in the browser) and you can disable it in Google Chrome by launching as follows: <b>google-chrome --disable-web-security</b> (tested on Ubuntu) or <b>chrome.exe --disable-web-security</b> (tested on Windows XP). Please close all chrome windows first. <br/>
+PLEASE NOTE all this 'security disabling' would not be needed if you hosted the player on the same domain as your video, which is the intended way of deploying the player.</li>
+
+</ul>
+
 
 <h2>How it works (roughly)</h2>
 <ul>
@@ -111,7 +114,7 @@ PLEASE NOTE all this 'security disabling' would not be needed if you hosted the 
 <h2>What is not supported yet</h2>
 The current player is merely a proof of concept. It has a lot of limitations:
 <ul>
-<li>Adaptativeness and waiting for enough data before start. You may experience some junk on video when you play it for the first time; or if your connection is too slow. Reload the page and enjoy better experience thanks to your browser cache. Or, just select lower bitrate.</li>
+<li>Adaptativity and waiting for enough data before start. You may experience some junk on video when you play it for the first time; or if your connection is too slow. Reload the page and enjoy better experience thanks to your browser cache. Or, just select lower bitrate.</li>
 <li>Changing video quality during playback. If you change it, you will see junk on video. You can only select the video quality before the playback starts. </li>
 <li>Audio. There is no audio, only the video track is processed.</li>
 <li>Changing the video. Once the playback is started, there is no possibility to reinit it for the different file. (you need to reload the page)</li>
