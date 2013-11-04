@@ -23,20 +23,22 @@ There is however one important limitation: no DRM available.
 <h2>Why is this an important achievement?</h2>
 There are several reasons:
 <ul>
-<li>All it needs is a modern browser. Please consider all the environements where silverlight is not available: all kinds of mobile devices (Android, WebOSes), or various non-windows operating systems. This is the great gap for all smoothstreaming-based video services which our player fills.</li>
+<li>All it needs is a modern browser. While Silverlight is a nice technology, there are unfortunately many environements where it is not available: many kinds of mobile devices (Android, WebOSes) and various non-windows operating systems. This is the great gap for all smoothstreaming-based video services which our player intends to fill.</li>
 <li>The player is fully programmable and you can have complete and straightforward control over it from javascript level.</li>
 <li>The player is compatible with other HTML5 features, from element positioning tro the WebGL. You will find some nice examples below.</li>
-<li>Users don't need to install Silverlight or anything, it works on all modern browsers out-of-the-box.</li>
+<li>Users don't need to install any plugins (Silverlight), it works on all modern browsers out-of-the-box.</li>
 </ul>
 
 <h2>Ok, but you could use DASH! Why smoothstreaming?</h2>
-Because there are already a lot of deployed smoothstreaming headends, just waiting to be used. And not so many DASH ones.
+Smoothstreaming is a Microsoft technology, while DASH is an open standard. Both W3C and many industry players (Google) are pushing towards DASH, which is, in long term, a good choice (even Microsoft is strongly involved in DASH development). So why are we interested in Smoothstreaming?<br>
+The answer is pretty simple. Today, Smoothstreaming is widely used and that will not change very soon. There are already a lot of deployed smoothstreaming headends just waiting to be used.
 
 <h2>Prerequisities</h2>
 <ul>
 <li>Your browser must support Media Streaming Extensions. Latest versions of Google Chrome and Internet Explorer are known to support it.</li>
-<li>Since our javascript retrieves data from other server, the server must allow cross-domain ajax requests using the Access-Control-Allow-Origin header. If your server doesn't allow it and you are unable to reconfigure it, please disable the security checks (it is done client-side) by launching chrome as follows: <b>google-chrome --disable-web-security</b> (tested on Ubuntu) or <b>chrome.exe --disable-web-security</b> (tested on Windows XP). Please close all chrome windows first.</li>
-<b>IMPORTANT! You must use --disable-web-security switch to access our test server, too!</b>
+<li>If you want to use the player hosted on ppietrak.github.io to play content from your own server, or use our "Orange Labs Test Server", you need to disable origin access security policy in your browser. Basically speaking, your browser will not allow javascript hosted on ppietrak.github.io to access data from other server (unless the server allows it explicitly using the Access-Control-Allow-Origin; but it is typically not allowed). This security check is done client-side (in the browser) and you can disable it in Google Chrome by launching as follows: <b>google-chrome --disable-web-security</b> (tested on Ubuntu) or <b>chrome.exe --disable-web-security</b> (tested on Windows XP). Please close all chrome windows first. <br/>
+PLEASE NOTE all this 'security disabling' would not be needed if you hosted the player on the same domain as your video, which is the intended way of deploying the player.</li>
+
 </ul>
 
 <h2>Play video</h2>
@@ -53,29 +55,33 @@ Because there are already a lot of deployed smoothstreaming headends, just waiti
 		<td style="text-align:right;">Or, select one of ours:</td>
 		<td>
 			<select id="input_sample" style="width:100%">
-				<option value="http://origin-vod-ss.ott.rd.tp.pl/SS/bunny2/bunny2/BigBuckBunny.ism/manifest">Test video 1: Big Buck Bunny</option>
-				<option value="http://origin-vod-ss.ott.rd.tp.pl/SS/Faust/Faust/euronews-vod.ism/manifest">Test video 2: Weather broadcast</option>
-				<option value="http://origin-vod-ss.ott.rd.tp.pl/SS/Zaglada/Zaglada/tvtit-vod-2.ism/manifest">Test video 3</option>
-				<option value="http://origin-vod-ss.ott.rd.tp.pl/SS/Robale/Robale/tvtit-vod-1.ism/manifest">Test video 4</option>
+				<option value="/BigBuckBunny.ism/manifest.xml">Same domain hosted: Big Buck Bunny</option>
+				<option value="http://origin-vod-ss.ott.rd.tp.pl/SS/bunny2/bunny2/BigBuckBunny.ism/manifest">Orange Labs Test Server: Big Buck Bunny</option>
+				<option value="http://origin-vod-ss.ott.rd.tp.pl/SS/Faust/Faust/euronews-vod.ism/manifest">Orange Labs Test Server: Weather broadcast</option>
+				<option value="http://origin-vod-ss.ott.rd.tp.pl/SS/Zaglada/Zaglada/tvtit-vod-2.ism/manifest">Orange Labs Test Server, video 3</option>
+				<option value="http://origin-vod-ss.ott.rd.tp.pl/SS/Robale/Robale/tvtit-vod-1.ism/manifest">Orange Labs Test Server, video 4</option>
               
 			</select>
 		</td>
 		<td><input type="button" onclick="runDemo(document.getElementById('input_sample').value);" value="> Load it!"/></td>
 	</tr>
 </table>
-<div style="font-size:10px;padding-top:10px;">Our test videos are hosted on the test smoothstriming platform of Orange Labs Poland, which is, as its name suggests, for tests only; it may stop working any time. The Big Buck Bunny video courtesy of Blender Foundation | www.blender.org. </div>
+<div style="padding-top:10px;color:red;">
+<b>IMPORTANT! Only the first option (same domain video) will work without hosting the player on the same domain as the video or disabling the origin access security policy in browser (please read prerequisities above for details).</b>
+</div>
+<div style="font-size:10px;padding-top:10px;">The Big Buck Bunny video courtesy of Blender Foundation | www.blender.org. </div>
 
 <h3>Step 2: Select quality</h3>
 
 <div id="quality" style="margin-bottom:10px;"></div>
 <div id="vparent" style="position:relative">
 <video id="v" controls autoplay width="640" height="480"></video>
-<div id="curtainleft" style="position:absolute;left:0;top:0;bottom:0;right:100%;background-color:rgb(35,35,35);"></div>
-<div id="curtainright" style="position:absolute;left:100%;top:0;bottom:0;right:0;background-color:rgb(35,35,35);"></div>
+<div id="curtainleft" style="position:absolute;left:0;top:0;bottom:0;right:100%;background-color:#252525;"></div>
+<div id="curtainright" style="position:absolute;left:100%;top:0;bottom:0;right:0;background-color:#252525;"></div>
 </div>
 
 <div style="experiments">
-<h3>Step 3: Enjoy HTML5 (if you are still thinking Silverlight is better)</h3>
+<h3>Step 3: Enjoy the power of HTML5</h3>
 <input type="button" onclick="runEffect(0);" value="> Effect 1"/>
 <input type="button" onclick="runEffect(1);" value="> Effect 2"/>
 <input type="button" onclick="runEffect(2);" value="> Effect 3"/>
@@ -110,6 +116,7 @@ The current player is merely a proof of concept. It has a lot of limitations:
 <li>Audio. There is no audio, only the video track is processed.</li>
 <li>Changing the video. Once the playback is started, there is no possibility to reinit it for the different file. (you need to reload the page)</li>
 <li>Jumps to position. You can only jump in the downloaded content, using the navigation bar of the video element. But you cannot jump into the timeline position which is not downloaded yet.</li>
+<li>End of file is not handled properly yet</li>
 </ul>
 
 All of the problems are not roadblockers (well, audio/video synchronisation and quality changing may still be little tricky). The real difficulty was processing the binary fragments, including codec information manipulation. And we have already done it. Now, the main roadblock is removed and the way for javascript smoothstreaming player is open.

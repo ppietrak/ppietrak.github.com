@@ -48,7 +48,7 @@ SmPlayer.prototype.open = function( url, callback )
             return;
 		}
 
-        smPlayer.smMedia = new SmMediaObject(xhr.responseXML, url.replace('/manifest','').replace('/Manifest','')); 
+        smPlayer.smMedia = new SmMediaObject(xhr.responseXML, url.replace('/manifest.xml','').replace('/manifest','').replace('/Manifest','')); 
 
         if (callback)
             callback( smPlayer.smMedia );
